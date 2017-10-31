@@ -122,7 +122,7 @@ Tree.prototype = {
     },
     tmpl: {
         skip: ['${body}', ''],
-        parametrized: ['function(params) { return ${body} }', ' + '],
+        parametrized: ['function(params) { return ${body} }', ', '],
         param: ['params[${body}]', ' + '],
         dynamic: ['this.keyset("${keyset}").key("${key}", {${body}})', ', '],
         property: ['"${name}": ${body}', ' + '],
@@ -137,12 +137,13 @@ Tree.prototype = {
             result = node;
         } else {
             var chunkTmpl = tmpl[0],
-                separator = tmpl[1];
+                separator = tmpl[1],
+                nodeBody = node.body.filter(function (item) {
+                    return item.type !== 'wtf';
+                }).map(this.toString, this).join(separator);
 
             result = fill(chunkTmpl, extend(node.data, {
-                body: node.body.filter(function (item) {
-                    return item.type !== 'wtf';
-                }).map(this.toString, this).join(separator)
+                body: node.type === 'parametrized' ? '[' + nodeBody + ']' : nodeBody
             }));
         }
 
